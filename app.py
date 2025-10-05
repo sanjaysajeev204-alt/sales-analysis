@@ -17,6 +17,7 @@ uploaded_file = st.sidebar.file_uploader("Upload your CSV file", type=["csv"])
 @st.cache_data
 def load_data(file):
     df = pd.read_csv(file, parse_dates=["Date"], dayfirst=True)
+    df = df.sort_values("Date")  # Sort by Date ascending
     return df
 
 # --- Handle Uploaded or Default Data ---
@@ -25,6 +26,7 @@ if uploaded_file is not None:
 else:
     st.sidebar.info("Using default sample data (data.csv).")
     df = pd.read_csv("data.csv", parse_dates=["Date"])
+    df = df.sort_values("Date")
 
 # --- KPIs ---
 total_sales = df['Sales'].sum()
@@ -32,9 +34,9 @@ total_orders = df['Orders'].sum()
 total_profit = df['Profit'].sum()
 
 col1, col2, col3 = st.columns(3)
-col1.metric("💰 Total Sales", f"${total_sales:,.0f}")
+col1.metric("💰 Total Sales", f"₹{total_sales:,.0f}")
 col2.metric("📦 Total Orders", f"{total_orders}")
-col3.metric("💹 Total Profit", f"${total_profit:,.0f}")
+col3.metric("💹 Total Profit", f"₹{total_profit:,.0f}")
 
 st.markdown("---")
 
@@ -54,10 +56,12 @@ tab1, tab2 = st.tabs(["📈 Sales Trend", "🏷️ Sales by Category"])
 
 with tab1:
     trend_fig = px.line(filtered_df, x="Date", y="Sales", title="Sales Over Time", markers=True)
+    trend_fig.update_layout(yaxis_tickprefix="₹")
     st.plotly_chart(trend_fig, use_container_width=True)
 
 with tab2:
     cat_fig = px.bar(filtered_df, x="Category", y="Sales", color="Category", title="Sales by Category")
+    cat_fig.update_layout(yaxis_tickprefix="₹")
     st.plotly_chart(cat_fig, use_container_width=True)
 
 # --- Data Preview ---
